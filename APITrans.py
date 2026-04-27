@@ -10,7 +10,7 @@ from modelo import Transcripcion
 from verificarArchivo import verificarArchivo
 from TransPorNombre import router as buscarPorNombre
 from obtenerDatosDB import router as obtenerHistorial
-
+from APIGroq import resumirTexto
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -25,7 +25,7 @@ app.include_router(buscarPorNombre)
 app.include_router(obtenerHistorial)
 
 #Cargamos el modelo de Whisper
-modelo = whisper.load_model("base")
+modelo = whisper.load_model("medium")
 
 @app.post("/transcribe")
 async def transcribeAudio(nombre : str = Form(...), archivo: UploadFile = File(...)):
@@ -48,6 +48,7 @@ async def transcribeAudio(nombre : str = Form(...), archivo: UploadFile = File(.
         print("Archivo guardado")    
         #Transcribir el audio
         resultado = modelo.transcribe(f"Archivo/{temporalFile}")
+        textoResumido = resumirTexto(resultado)
         print("Transcripcion hecha")
         #Obtener el texto transcrito
         texto = resultado["text"]
@@ -62,7 +63,8 @@ async def transcribeAudio(nombre : str = Form(...), archivo: UploadFile = File(.
         return{
             "mensaje": "ok",
             "nombre": nombre,
-            "transcripcion" : texto
+            "transcripcion" : texto,
+            "texto_resumido" : textoResumido
         }
     except Exception as e:
         return{
