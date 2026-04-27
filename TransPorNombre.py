@@ -1,6 +1,6 @@
 import fastapi 
 from baseDeDatos import SessionLocal
-import modelo
+import modelo as modelo
 router = fastapi.APIRouter()
 
 def getDb():
